@@ -1,5 +1,5 @@
-use gdnative::api::*;
 use gdnative::prelude::*;
+use gdnative_api::*;
 
 /// The {{class_name}} "class"
 #[derive(NativeClass)]

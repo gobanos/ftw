@@ -15,13 +15,12 @@ mod util;
 
 use crate::ftw_command::FtwCommand;
 use crate::traits::{Processor, ToMessage};
-use clap::{clap_app, crate_authors, crate_name, crate_version, App, AppSettings, ArgMatches};
+use clap::{crate_authors, crate_name, crate_version, App, ArgMatches, Arg};
 use std::env;
 
 #[cfg(not(tarpaulin_include))]
 fn main() -> Result<(), ()> {
     let matches = get_clap_app()
-        .setting(AppSettings::ColoredHelp)
         .get_matches();
     let command = parse_matches(&matches);
     command
@@ -33,32 +32,38 @@ fn main() -> Result<(), ()> {
 fn get_clap_app() -> App<'static> {
     let version = crate_version!();
     let author = crate_authors!("\n");
-    clap_app!((crate_name!()) =>
-              (version: version)
-              (author: author)
-              (about: "manage your godot-rust project")
-              (@subcommand new =>
-                (about: "create a new godot-rust project directory")
-                (@arg project_name: +required "set the name of your project")
-                (@arg template: !required "set the template to be used in your project"))
-              (@subcommand class =>
-                (about: "create a new class to be used by a node")
-                (@arg class_name: +required "the name of this class")
-                (@arg node_type: !required "the type of the node that this class inherits from"))
-              (@subcommand singleton =>
-                (about: "create a singleton (autoloaded) class")
-                (@arg class_name: +required "the name of this class"))
-              (@subcommand run =>
-                (about: "run a debug version of the game")
-                (@arg machine_type: !required "either desktop or server"))
-              (@subcommand build =>
-                (about: "build the library for a particular platform")
-                (@arg target: !required "target platform to build")
-                (@arg build_type: !required "either a debug or release"))
-              (@subcommand export =>
-                (about: "export the game for a particular platform")
-                (@arg target: !required "target platform to build")
-                (@arg build_type: !required "either a debug or release")))
+    App::new(crate_name!())
+        .version(version)
+        .author(author)
+        .about("manage your godot-rust project")
+        .subcommand(App::new("new")
+            .about("create a new godot-rust project directory")
+            .arg(Arg::new("project_name").required(true).about("set the name of your project"))
+            .arg(Arg::new("template").required(false).about("set the template to be used in your project"))
+        )
+        .subcommand(App::new("class")
+            .about("create a new class to be used by a node")
+            .arg(Arg::new("class_name").required(true).about("the name of this class"))
+            .arg(Arg::new("node_type").required(false).about("the type of the node that this class inherits from"))
+        )
+        .subcommand(App::new("singleton")
+            .about("create a singleton (autoloaded) class")
+            .arg(Arg::new("class_name").required(true).about("the name of this class"))
+        )
+        .subcommand(App::new("run")
+            .about("run a debug version of the game")
+            .arg(Arg::new("machine_type").required(false).about("either desktop or server"))
+        )
+        .subcommand(App::new("build")
+            .about("build the library for a particular platform")
+            .arg(Arg::new("target").required(false).about("target platform to build"))
+            .arg(Arg::new("build_type").required(false).about("either a debug or release"))
+        )
+        .subcommand(App::new("export")
+            .about("export the game for a particular platform")
+            .arg(Arg::new("target").required(false).about("target platform to build"))
+            .arg(Arg::new("build_type").required(false).about("either a debug or release"))
+        )
 }
 
 fn parse_matches(matches: &ArgMatches) -> FtwCommand {
